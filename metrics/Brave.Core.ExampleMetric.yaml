@@ -1,0 +1,5 @@
+ephemeral: true
+attributes:
+  - answer_index
+  - country_code
+  - dtoi
