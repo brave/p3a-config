@@ -3,3 +3,24 @@ attributes:
   - answer_index
   - country_code
   - dtoi
+cadence: typical
+# definition:
+#   type: time_period_events
+#   period_days: 7
+#   histogram_name: Brave.Wallet.OnWalletPressed
+#   storage_key: wallet_presses
+#   buckets: [0, 1, 4, 8]
+# definition:
+#   type: pref
+#   pref_name: tor.tor_disabled
+#   value_map:
+#     false: 0
+#     true: 1
+  
+definition:
+  type: pref
+  pref_name: brave.ai_chat.tab_organization_enabled
+  use_profile_prefs: true
+  value_map:
+    false: 0
+    true: 1
