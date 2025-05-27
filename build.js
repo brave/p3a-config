@@ -37,6 +37,6 @@ const manifest = { metrics };
 
 // Write to dist/p3a_manifest.json
 const outputPath = path.join(distDir, 'p3a_manifest.json');
-fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
+fs.writeFileSync(outputPath, JSON.stringify(manifest));
 
-console.log(`Generated p3a_manifest.json with ${Object.keys(metrics).length} metrics`); 
+console.log(`Generated p3a_manifest.json with ${Object.keys(metrics).length} metrics`);
