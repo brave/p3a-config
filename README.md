@@ -1,4 +1,4 @@
-# P3A Remote Configuration Builder
+# P3A Remote Configuration
 
 Provides remote configuration for P3A metrics via the component updater.
 
