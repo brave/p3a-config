@@ -23,31 +23,64 @@ const validAttributes = [
   'dtoa'
 ];
 
-// Schema for time_period_events definition
-const timePeriodEventsSchema = z.object({
+const intermediateDefinitionSchema = z.lazy(() => z.discriminatedUnion('type', [
+  timePeriodEventsIntermediateSchema,
+  prefIntermediateSchema,
+  probeIntermediateSchema,
+  bucketIntermediateSchema,
+  valueMapIntermediateSchema,
+  percentageIntermediateSchema,
+]));
+
+// Schema for time_period_events intermediate
+const timePeriodEventsIntermediateSchema = z.object({
   type: z.literal('time_period_events'),
-  period_days: z.number().positive(),
-  histogram_name: z.string().min(1),
   storage_key: z.string().min(1),
-  buckets: z.array(z.number()).min(1),
-  report_max: z.boolean().optional(),
-  add_histogram_value_to_storage: z.boolean().optional(),
-  min_report_amount: z.number().optional(),
+  period_days: z.number().positive(),
+  replace_today: z.boolean().optional(),
+  report_highest: z.boolean().optional(),
+  add_histogram_value: z.boolean().optional(),
+  sources: z.array(intermediateDefinitionSchema).optional(),
 }).strict();
 
-// Schema for pref definition
-const prefSchema = z.object({
+// Schema for pref intermediate
+const prefIntermediateSchema = z.object({
   type: z.literal('pref'),
   pref_name: z.string().min(1),
-  value_map: z.record(z.string(), z.any()).refine(
-    (obj) => Object.keys(obj).length > 0,
-    { error: "value_map must not be empty" }
-  ),
-  use_profile_prefs: z.boolean().optional(),
+  use_profile_prefs: z.boolean(),
 }).strict();
 
-// Union of all definition types
-const definitionSchema = z.discriminatedUnion('type', [timePeriodEventsSchema, prefSchema]);
+// Schema for probe intermediate
+const probeIntermediateSchema = z.object({
+  type: z.literal('probe'),
+  histogram_name: z.string().min(1),
+  filter: z.array(z.number()).optional(),
+}).strict();
+
+// Schema for bucket intermediate
+const bucketIntermediateSchema = z.object({
+  type: z.literal('bucket'),
+  source: intermediateDefinitionSchema,
+  buckets: z.array(z.number()).min(1),
+}).strict();
+
+// Schema for value_map intermediate
+const valueMapIntermediateSchema = z.object({
+  type: z.literal('value_map'),
+  source: intermediateDefinitionSchema,
+  map: z.record(z.string(), z.any()).refine(
+    (obj) => Object.keys(obj).length > 0,
+    { error: "map must not be empty" }
+  ),
+}).strict();
+
+// Schema for percentage intermediate
+const percentageIntermediateSchema = z.object({
+  type: z.literal('percentage'),
+  numerator: intermediateDefinitionSchema,
+  denominator: intermediateDefinitionSchema,
+  multiplier: z.number().optional(),
+}).strict();
 
 // Schema for the complete metric configuration
 const metricSchema = z.object({
@@ -60,7 +93,9 @@ const metricSchema = z.object({
   record_activation_date: z.boolean().optional(),
   activation_metric_name: z.string().optional(),
   cadence: z.enum(validCadences).optional(),
-  definition: definitionSchema.optional(),
+  definition: intermediateDefinitionSchema.and(z.object({
+    min_version: z.string().optional(),
+  })).optional(),
 }).strict().refine(
   (data) => {
     // If definition is present, cadence must also be present
