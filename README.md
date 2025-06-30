@@ -111,7 +111,7 @@ source:                          # Source intermediate to bucket
   # ... time_period_events fields
 ```
 
-#### Value Map Intermediate
+#### Value Map
 
 Maps values from a source intermediate using a lookup table.
 
@@ -125,7 +125,7 @@ source:                          # Source intermediate to map
   # ... pref fields
 ```
 
-#### Percentage Intermediate
+#### Percentage
 
 Calculates a percentage from numerator and denominator intermediates.
 
