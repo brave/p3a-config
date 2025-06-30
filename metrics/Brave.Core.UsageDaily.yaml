@@ -4,10 +4,3 @@ attributes:
   - country_code
   - dtoi
 cadence: typical
-
-definition:
-  type: 'time_period_events'
-  period_days: 7
-  histogram_name: 'Brave.Core.ExampleProbe'
-  storage_key: 'example'
-  buckets: [1, 2]
