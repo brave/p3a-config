@@ -55,42 +55,95 @@ Both `attributes` and `append_attributes` arrays can only contain these values:
 - `dtoi` - Date of install attribute
 - `dtoa` - Date of activation attribute
 
-### Definition Types
+### Definition Structure
 
-The `definition` field can be one of the following:
+The `definition` field uses a nested intermediate system where different intermediate types can be composed together. Each intermediate has a `type` field that determines its structure and behavior.
 
-#### Time Period Events Definition
+The root definition can also include an optional `min_version` field to specify the minimum browser version required for the metric.
 
-Counts & reports events from a given histogram.
+### Intermediate Types
+
+#### Time Period Events
+
+Counts & reports events over a time period, optionally aggregating from multiple sources.
 
 ```yaml
-definition:
+type: time_period_events
+storage_key: "example_key"        # Storage key (non-empty string)
+period_days: 7                    # Number of days in the event period (positive integer)
+replace_today: true               # Optional: whether to replace today's data
+report_highest: false             # Optional: whether to report highest value
+add_histogram_value: true         # Optional: add histogram value instead of count
+sources:                          # Optional: array of source intermediates
+  - type: probe
+    histogram_name: "ExampleHistogram"
+```
+
+#### Pref
+
+Reads preference values.
+
+```yaml
+type: pref
+pref_name: "example.preference"   # Preference name (non-empty string)
+use_profile_prefs: true           # Whether to use profile preferences
+```
+
+#### Probe
+
+Captures histogram/probe events.
+
+```yaml
+type: probe
+histogram_name: "ExampleHistogram" # Histogram name (non-empty string)
+filter: [1, 2, 3]                  # Optional: array of bucket filters
+```
+
+#### Bucket
+
+Groups values from a source intermediate into numeric buckets based on defined thresholds.
+
+```yaml
+type: bucket
+buckets: [1, 5, 10, 50]          # Array of bucket values (at least one number)
+source:                          # Source intermediate to bucket
   type: time_period_events
-  period_days: 7                    # Number of days in the event period (positive integer)
-  histogram_name: "example_histogram" # Name of the histogram (non-empty string)
-  storage_key: "example_key"        # Storage key (non-empty string)
-  buckets: [1, 5, 10, 50]          # Array of bucket values (at least one number)
-  report_max: true                  # Optional: whether to report daily maximum instead of count; add_histogram_value_to_storage
-  add_histogram_value_to_storage: false # Optional: add histogram value to storage instead of adding 1
-  min_report_amount: 10             # Optional: minimum amount to report
+  # ... time_period_events fields
 ```
 
-#### Preference Definition
+#### Value Map
+
+Maps values from a source intermediate using a lookup table.
 
 ```yaml
-definition:
+type: value_map
+map:                             # Map of source values to output values (must not be empty)
+  "enabled": 1
+  "disabled": 0
+source:                          # Source intermediate to map
   type: pref
-  pref_name: "example.preference"   # Preference name (non-empty string)
-  value_map:                        # Map of pref values to metric answers (must not be empty)
-    "enabled": 1
-    "disabled": 0
-  use_profile_prefs: true           # Optional: whether to use profile preferences instead of local state
+  # ... pref fields
 ```
+
+#### Percentage
+
+Calculates a percentage from numerator and denominator intermediates.
+
+```yaml
+type: percentage
+multiplier: 1                    # Optional: multiplier for the percentage (default: 1)
+numerator:                       # Numerator intermediate
+  type: time_period_events
+  # ... time_period_events fields
+denominator:                     # Denominator intermediate
+  type: time_period_events  
+  # ... time_period_events fields
+```
+
 
 ### Example Metric Configuration
 
 ```yaml
-# metrics/example_metric.yaml
 ephemeral: false
 constellation_only: true
 attributes:
@@ -99,10 +152,14 @@ attributes:
   - "country_code"
 cadence: "typical"
 definition:
-  type: "time_period_events"
-  period_days: 7
-  histogram_name: "ExampleHistogram"
-  storage_key: "example_storage_key"
-  buckets: [1, 5, 10, 25, 50]
-  report_max: true
+  type: bucket
+  buckets: [1, 3]
+  min_version: "1.60.0"
+  source:
+    type: time_period_events
+    period_days: 7
+    storage_key: 'example'
+    sources:
+      - type: probe
+        histogram_name: 'Brave.Core.ExampleProbe'
 ```
