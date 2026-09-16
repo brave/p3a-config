@@ -2,6 +2,14 @@
   "name": "p3a-config",
   "version": "1.0.0",
   "main": "index.js",
+  "packageManager": "pnpm@12.4.2",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.0.0",
+      "onFail": "download"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node build.mjs"
@@ -10,7 +18,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.2",
     "zod": "^3.25.67"
   }
 }
