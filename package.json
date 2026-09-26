@@ -2,7 +2,7 @@
   "name": "p3a-config",
   "version": "1.0.0",
   "main": "index.js",
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "devEngines": {
     "runtime": {
       "name": "node",
