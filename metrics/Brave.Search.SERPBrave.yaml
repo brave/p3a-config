@@ -1,2 +1,4 @@
-append_attributes:
+attributes:
+  - answer_index
+  - platform
   - country_code
