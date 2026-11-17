@@ -1,6 +1,6 @@
 attributes:
   - answer_index
   - platform
-  - country_code
   - yoi
+  - country_code
   - woi
